@@ -4,8 +4,9 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
+  // origin: "http://localhost:5173" for local
   cors: {
-    origin: "http://localhost:5173"
+    origin: "https://golden-custard-2faa5d.netlify.app/"
   }
 });
 
