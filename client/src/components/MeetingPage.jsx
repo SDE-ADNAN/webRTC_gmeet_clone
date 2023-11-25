@@ -34,6 +34,7 @@ export function MeetingPage() {
         window.navigator.mediaDevices
           .getUserMedia({
             video: true,
+            audio:true
           })
           .then(async (stream) => {
             setVideoStream(stream);
