@@ -6,7 +6,8 @@ const { Server } = require("socket.io");
 const io = new Server(server, {
   // origin: "http://localhost:5173" for local
   cors: {
-    origin: "https://golden-custard-2faa5d.netlify.app/"
+    // origin: "https://golden-custard-2faa5d.netlify.app/"
+    origin: "https://gmeetclone-2.netlify.app"
   }
 });
 
