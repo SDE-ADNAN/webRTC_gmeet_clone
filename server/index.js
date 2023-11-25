@@ -4,8 +4,8 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
-  // origin: "http://localhost:5173" for local
   cors: {
+    // origin: "http://localhost:5173"
     // origin: "https://golden-custard-2faa5d.netlify.app/"
     origin: "https://gmeetclone-2.netlify.app"
   }
@@ -97,3 +97,8 @@ io.on('connection', (socket) => {
 server.listen(3001, () => {
   console.log('listening on *:3001');
 });
+
+var host = Object.values(require('os').networkInterfaces()).reduce((r, list) => r.concat(list.reduce((rr, i) => rr.concat(i.family === 'IPv4' && !i.internal && i.address || []), [])), [])
+
+console.log("your localhost is : http://localhost:" + 3001);
+console.log("for access on other devices (on same network) : http://" + host + ":" + 3001);

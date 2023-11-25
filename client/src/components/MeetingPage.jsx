@@ -24,7 +24,7 @@ export function MeetingPage() {
     const roomId = params.roomId;
 
     useEffect(() => {
-      // const s = socketIO.connect("http://localhost:3001"); for local
+      // const s = socketIO.connect("http://localhost:3001"); 
       const s = socketIO.connect("https://webrtc-gmeet-clone.onrender.com");
       s.on("connect", () => {
         setSocket(s);
@@ -102,7 +102,8 @@ export function MeetingPage() {
                         pc.onicecandidate = ({candidate}) => {
                             socket.emit("iceCandidate", {candidate});
                         }
-                        pc.addTrack(videoStream.getVideoTracks()[0])
+                        pc.addTrack(videoStream.getVideoTracks()[0]);
+                        pc.addTrack(videoStream.getAudioTracks()[0]); 
                             try {
                                  await pc.setLocalDescription(await pc.createOffer());
                                 console.log({ aa: pc.localDescription });
