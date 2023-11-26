@@ -126,7 +126,7 @@ export function MeetingPage() {
   return (
     <Grid container spacing={2} alignContent={"center"} justifyContent={"center"}>
       <Grid item xs={12} md={6} lg={4}>
-        <Video stream={videoStream} mute={true}/>
+        <Video stream={videoStream} mute={false}/>
       </Grid>
       <Grid item xs={12} md={6} lg={4}>
         <Video stream={remoteVideoStream} muted={false} />
