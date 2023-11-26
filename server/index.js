@@ -5,11 +5,12 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
-    origins: [
-      "https://gmeet-clone1.netlify.app",
-      "https://gmeetclone-2.netlify.app",
-      "http://localhost:5173",
-    ]
+    // origins: [
+    //   "https://gmeet-clone1.netlify.app",
+    //   "https://gmeetclone-2.netlify.app",
+    //   "http://localhost:5173",
+    // ]
+    origin:"*"
   }
 });
 
