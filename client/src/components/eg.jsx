@@ -54,30 +54,21 @@ export function MeetingPage() {
         });
 
       s.on("localDescription", async ({ description }) => {
-        pc.setRemoteDescription(description);
-
-        s.on("iceCandidate", ({ candidate }) => {
-          pc.addIceCandidate(candidate);
-        });
-
-        pc.onicecandidate = ({ candidate }) => {
-          s.emit("iceCandidateReply", { candidate });
-        };
-
-        await pc.setLocalDescription(await pc.createAnswer());
-        s.emit("remoteDescription", { description: pc.localDescription });
+        try {
+          await pc.setRemoteDescription(description);
+          await pc.setLocalDescription(await pc.createAnswer());
+          s.emit("remoteDescription", { description: pc.localDescription });
+        } catch (err) {
+          console.error(err);
+        }
       });
 
       s.on("remoteDescription", async ({ description }) => {
-        pc.setRemoteDescription(description);
-
-        s.on("iceCandidate", ({ candidate }) => {
-          pc.addIceCandidate(candidate);
-        });
-
-        pc.onicecandidate = ({ candidate }) => {
-          s.emit("iceCandidateReply", { candidate });
-        };
+        try {
+          await pc.setRemoteDescription(description);
+        } catch (err) {
+          console.error(err);
+        }
       });
     });
   }, []);
@@ -129,7 +120,7 @@ export function MeetingPage() {
         <Video stream={videoStream} mute={true}/>
       </Grid>
       <Grid item xs={12} md={6} lg={4}>
-        <Video stream={remoteVideoStream} muted={false} />
+        <Video stream={remoteVideoStream} />
       </Grid>
     </Grid>
   );
