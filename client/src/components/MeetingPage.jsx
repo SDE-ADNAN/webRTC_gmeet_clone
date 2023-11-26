@@ -17,8 +17,8 @@ export function MeetingPage() {
   const [socket, setSocket] = useState(null);
   const [meetingJoined, setMeetingJoined] = useState(false);
   const [videoStream, setVideoStream] = useState();
-  const [remoteVideoStream, setRemoteVideoStream] = useState();
-  
+  const [remoteStream, setRemoteStream] = useState(new MediaStream());
+
   const params = useParams();
   const roomId = params.roomId;
 
@@ -44,7 +44,11 @@ export function MeetingPage() {
           pc.ontrack = (event) => {
             event.streams[0].getTracks().forEach((track) => {
               if (track.kind === 'video') {
-                setRemoteVideoStream(new MediaStream([track]));
+                setRemoteStream(prevStream => {
+                  const newStream = prevStream.clone();
+                  newStream.addTrack(track);
+                  return newStream;
+                });
               }
             });
           };
@@ -126,10 +130,10 @@ export function MeetingPage() {
   return (
     <Grid container spacing={2} alignContent={"center"} justifyContent={"center"}>
       <Grid item xs={12} md={6} lg={4}>
-        <Video stream={videoStream} mute={false}/>
+        <Video stream={videoStream} mute={true}/>
       </Grid>
       <Grid item xs={12} md={6} lg={4}>
-        <Video stream={remoteVideoStream} muted={false} />
+        <Video stream={remoteStream} mute={false} />
       </Grid>
     </Grid>
   );
