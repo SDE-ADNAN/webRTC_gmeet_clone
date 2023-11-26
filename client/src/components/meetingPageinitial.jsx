@@ -34,15 +34,9 @@ export function MeetingPage() {
         window.navigator.mediaDevices
           .getUserMedia({
             video: true,
-            audio:true
           })
           .then(async (stream) => {
             setVideoStream(stream);
-          //   const videoTracks = stream.getVideoTracks()[0];
-          // const audioTracks = stream.getAudioTracks()[0];
-
-          // pc.addTransceiver(videoTracks, { streams: [stream] });
-          // pc.addTransceiver(audioTracks, { streams: [stream] });
           });
 
         s.on("localDescription", async ({ description }) => {
@@ -106,32 +100,23 @@ export function MeetingPage() {
                         pc.onicecandidate = ({candidate}) => {
                             socket.emit("iceCandidate", {candidate});
                         }
-                pc.addTrack(videoStream.getVideoTracks()[0])
-                try {
-                  await pc.setLocalDescription(await pc.createOffer());
-                  console.log({ aa: pc.localDescription });
-                  socket.emit("localDescription", { description: pc.localDescription });
-                } catch (err) {
-                  console.log({ msg: err?.message });
-                  console.error(err);
-                }
+                        pc.addTrack(videoStream.getVideoTracks()[0])
+                            try {
+                                 await pc.setLocalDescription(await pc.createOffer());
+                                console.log({ aa: pc.localDescription });
+                                socket.emit("localDescription", {description: pc.localDescription});
+                            } catch (err) {
+                                  console.log({ msg:err?.message });
+                                console.error(err);
+                            }
                     
             
-                
-                // try {
-                //   await pc.setRemoteDescription(await pc.createOffer());
-                //   console.log({ aa: pc.remoteDescription });
-                //   socket.emit("remoteDescription", { description: pc.remoteDescription });
-                // } catch (err) {
-                //   console.log({ msg: err?.message });
-                //   console.error(err);
-                // }
-                // socket.on("remoteDescription", async ({ description }) => {
-                //   await pc.setRemoteDescription(description);
-                // });
-                // socket.on("iceCandidateReply", ({ candidate }) => {
-                //   pc.addIceCandidate(candidate)
-                // });
+                        // socket.on("remoteDescription", async ({description}) => {
+                        //     await pc.setRemoteDescription(description);  
+                        // });
+                        // socket.on("iceCandidateReply", ({candidate}) => {
+                        //     pc.addIceCandidate(candidate)
+                        // });
                         setMeetingJoined(true);
                     }} disabled={!socket} variant="contained">
                         Join meeting
@@ -143,7 +128,7 @@ export function MeetingPage() {
     console.log({remoteVideoStream,videoStream})
     return <Grid container spacing={2} alignContent={"center"} justifyContent={"center"}>
         <Grid item xs={12} md={6} lg={4}>
-            <Video stream={videoStream} mute={true}/>
+            <Video stream={videoStream} />
         </Grid>
         <Grid item xs={12} md={6} lg={4}>
             <Video stream={remoteVideoStream} />
