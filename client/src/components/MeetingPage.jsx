@@ -6,6 +6,8 @@ import { CentralizedCard } from "./CentralizedCard";
 import { Video } from "./Video";
 
 let pc = new RTCPeerConnection({
+  // initiator: location.hash === "#1",
+  // stream: localStream,
   iceServers: [
     {
       urls: "stun:stun.l.google.com:19302",
@@ -30,59 +32,71 @@ export function MeetingPage() {
         roomId,
       });
 
-      window.navigator.mediaDevices
-        .getUserMedia({
-          video: true,
-          audio: true,
-        })
-        .then(async (stream) => {
-          setVideoStream(stream);
-          stream.getTracks().forEach((track) => {
-            pc.addTrack(track, stream);
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          .then((stream) => {
+            setVideoStream(stream);
+            stream.getTracks().forEach((track) => {
+              pc.addTrack(track, stream);
+            });
+
+            pc.ontrack = (event) => {
+              event.streams[0].getTracks().forEach((track) => {
+                if (track.kind === 'video' || track.kind === 'audio') {
+                  setRemoteStream(prevStream => {
+                    const newStream = prevStream.clone();
+                    newStream.addTrack(track);
+                    return newStream;
+                  });
+                }
+              });
+            };
+
+            pc.ontrack = (event) => {
+              event.streams[0].getTracks().forEach((track) => {
+                if (track.kind === 'video') {
+                  setRemoteStream(prevStream => {
+                    const newStream = prevStream.clone();
+                    newStream.addTrack(track);
+                    return newStream;
+                  });
+                }
+              });
+            };
+          })
+          .catch((error) => {
+            console.error('Error accessing media devices:', error);
           });
 
-          pc.ontrack = (event) => {
-            event.streams[0].getTracks().forEach((track) => {
-              if (track.kind === 'video') {
-                setRemoteStream(prevStream => {
-                  const newStream = prevStream.clone();
-                  newStream.addTrack(track);
-                  return newStream;
-                });
-              }
-            });
+        s.on("localDescription", async ({ description }) => {
+          pc.setRemoteDescription(description);
+
+          s.on("iceCandidate", ({ candidate }) => {
+            pc.addIceCandidate(candidate);
+          });
+
+          pc.onicecandidate = ({ candidate }) => {
+            s.emit("iceCandidateReply", { candidate });
           };
-        })
-        .catch((error) => {
-          console.error('Error accessing media devices:', error);
+
+          await pc.setLocalDescription(await pc.createAnswer());
+          s.emit("remoteDescription", { description: pc.localDescription });
         });
 
-      s.on("localDescription", async ({ description }) => {
-        pc.setRemoteDescription(description);
+        s.on("remoteDescription", async ({ description }) => {
+          pc.setRemoteDescription(description);
 
-        s.on("iceCandidate", ({ candidate }) => {
-          pc.addIceCandidate(candidate);
+          s.on("iceCandidate", ({ candidate }) => {
+            pc.addIceCandidate(candidate);
+          });
+
+          pc.onicecandidate = ({ candidate }) => {
+            s.emit("iceCandidateReply", { candidate });
+          };
         });
-
-        pc.onicecandidate = ({ candidate }) => {
-          s.emit("iceCandidateReply", { candidate });
-        };
-
-        await pc.setLocalDescription(await pc.createAnswer());
-        s.emit("remoteDescription", { description: pc.localDescription });
-      });
-
-      s.on("remoteDescription", async ({ description }) => {
-        pc.setRemoteDescription(description);
-
-        s.on("iceCandidate", ({ candidate }) => {
-          pc.addIceCandidate(candidate);
-        });
-
-        pc.onicecandidate = ({ candidate }) => {
-          s.emit("iceCandidateReply", { candidate });
-        };
-      });
+      }else {
+        console.error('getUserMedia is not supported in this browser');
+      }
     });
   }, []);
 
@@ -99,14 +113,14 @@ export function MeetingPage() {
               Hi welcome to meeting {roomId}.
             </Typography>
           </div>
-          <br/><br/>
+          <br /><br />
           <div style={{ display: "flex", justifyContent: "center" }}>
             <Button
               onClick={async () => {
                 pc.onicecandidate = ({ candidate }) => {
                   socket.emit("iceCandidate", { candidate });
                 };
-                
+
                 try {
                   await pc.setLocalDescription(await pc.createOffer());
                   socket.emit("localDescription", { description: pc.localDescription });
@@ -130,7 +144,7 @@ export function MeetingPage() {
   return (
     <Grid container spacing={2} alignContent={"center"} justifyContent={"center"}>
       <Grid item xs={12} md={6} lg={4}>
-        <Video stream={videoStream} mute={true}/>
+        <Video stream={videoStream} mute={true} />
       </Grid>
       <Grid item xs={12} md={6} lg={4}>
         <Video stream={remoteStream} mute={false} />
